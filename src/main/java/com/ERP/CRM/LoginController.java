@@ -34,10 +34,10 @@ public class LoginController {
         if (userService.authenticate(gmail, password)) {
             User user = userService.getUserByGmail(gmail);
             session.setAttribute("loggedInUser", user);
-            return "redirect:/hr"; // ✅ Must match the mapping in PageController
+            return "redirect:/hr"; // Redirect to HR page
         } else {
             model.addAttribute("error", "Invalid Gmail or Password");
-            return "Login"; // ✅ Make sure Login.html exists and is named with capital "L" if used
+            return "Login"; // This should be Login.html or Login.jsp
         }
     }
 
@@ -50,24 +50,22 @@ public class LoginController {
 
         if (gmail.isEmpty() || password.isEmpty() || phone.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "All fields are required!");
-            return "redirect:/hr"; // ✅ redirect to mapped /hr which returns HUMANResource.html
-        }
-
-        Optional<User> userOptional = userRepository.findByGmail(gmail);
-        if (userOptional.isPresent()) {
-            redirectAttributes.addFlashAttribute("error", "User Already Exists");
             return "redirect:/hr";
         }
 
-        User newUser = new User(gmail, password, phone);
+        if (userRepository.findByGmail(gmail).isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "User already exists!");
+            return "redirect:/hr";
+        }
+
         try {
-            userRepository.save(newUser);
-            redirectAttributes.addFlashAttribute("success", "User Added Successfully");
+            userRepository.save(new User(gmail, password, phone));
+            redirectAttributes.addFlashAttribute("success", "User added successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error while adding user: " + e.getMessage());
         }
 
-        return "redirect:/hr"; // ✅ /hr is mapped in PageController → HUMANResource.html
+        return "redirect:/hr";
     }
 
     // 📋 Add Lead
@@ -81,27 +79,23 @@ public class LoginController {
 
         if (gmail.isEmpty() || phone.isEmpty() || leadName.isEmpty() || address.isEmpty() || status.isEmpty()) {
             redirectAttributes.addFlashAttribute("error", "All fields are required!");
-            return "redirect:/leads"; // ✅ mapped in PageController
-        }
-
-        boolean userExists = userRepository.findByGmail(gmail).isPresent();
-        boolean leadExists = leadRepository.findByGmail(gmail).isPresent();
-
-        if (userExists || leadExists) {
-            redirectAttributes.addFlashAttribute("error", "Lead email already exists");
             return "redirect:/leads";
         }
 
-        LeadsDB newLead = new LeadsDB();
-        newLead.setCustomerName(leadName);
-        newLead.setAddress(address);
-        newLead.setPhoneNumber(phone);
-        newLead.setGmail(gmail);
-        newLead.setStatus(status);
+        if (userRepository.findByGmail(gmail).isPresent() || leadRepository.findByGmail(gmail).isPresent()) {
+            redirectAttributes.addFlashAttribute("error", "Lead email already exists.");
+            return "redirect:/leads";
+        }
 
         try {
-            leadRepository.save(newLead);
-            redirectAttributes.addFlashAttribute("success", "Lead Added Successfully");
+            LeadsDB lead = new LeadsDB();
+            lead.setCustomerName(leadName);
+            lead.setAddress(address);
+            lead.setPhoneNumber(phone);
+            lead.setGmail(gmail);
+            lead.setStatus(status);
+            leadRepository.save(lead);
+            redirectAttributes.addFlashAttribute("success", "Lead added successfully.");
         } catch (Exception e) {
             redirectAttributes.addFlashAttribute("error", "Error while adding lead: " + e.getMessage());
         }
@@ -109,20 +103,21 @@ public class LoginController {
         return "redirect:/leads";
     }
 
-    // 📦 Get All Users (API)
+    // 📦 Get All Users (JSON for API or frontend fetch)
     @GetMapping("/displayData")
     @ResponseBody
     public List<User> displayData() {
         return userService.getAllUsers();
     }
 
-    // ❌ Delete Employee (API)
+    // ❌ Delete Employee (JSON API)
     @DeleteMapping("/employees/{id}")
     @ResponseBody
     public String deleteEmployee(@PathVariable Long id) {
         if (userService.deleteUser(id)) {
             return "Employee deleted successfully";
+        } else {
+            return "User not found";
         }
-        return "User not found";
     }
 }
