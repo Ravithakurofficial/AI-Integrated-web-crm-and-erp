@@ -5,88 +5,81 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Login</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f4f4;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      height: 100vh;
-      margin: 0;
-    }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
 
-    .container {
-      background: white;
-      padding: 20px;
-      border-radius: 10px;
-      box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
-      width: 300px;
-      text-align: center;
-    }
+        .container {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
 
-    h2 {
-      margin-bottom: 20px;
-      color: #333;
-    }
+        h2 {
+            margin-bottom: 20px;
+            color: #333;
+        }
 
-    label {
-      display: block;
-      margin: 10px 0 5px;
-      font-weight: bold;
-      text-align: left;
-    }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            text-align: left;
+        }
 
-    input {
-      width: 100%;
-      padding: 10px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
-      box-sizing: border-box;
-    }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
 
-    button {
-      background: #007BFF;
-      color: white;
-      border: none;
-      padding: 10px;
-      width: 100%;
-      border-radius: 5px;
-      cursor: pointer;
-      font-size: 16px;
-    }
+        button {
+            background: #007BFF;
+            color: white;
+            border: none;
+            padding: 10px;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
 
-    button:hover {
-      background: #0056b3;
-    }
+        button:hover {
+            background: #0056b3;
+        }
 
-    .error {
-      color: red;
-      margin-top: 10px;
-    }
-  </style>
+        .error {
+            color: red;
+            margin-top: 10px;
+        }
+    </style>
 </head>
 <body>
 
 <div class="container">
   <h2>Login</h2>
+  <form action="/auth" method="post">
+    <label>Gmail:</label>
+    <input type="text" name="gmail" required>
 
-  <!-- ✅ Login form -->
-  <form th:action="@{/auth}" method="post">
-
-    <!-- ✅ CSRF Token for Spring Security -->
-    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
-
-    <label for="gmail">Gmail:</label>
-    <input type="text" id="gmail" name="gmail" placeholder="Enter your email" required>
-
-    <label for="password">Password:</label>
-    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+    <label>Password:</label>
+    <input type="password" name="password" required>
 
     <button type="submit">Login</button>
   </form>
 
-  <!-- ✅ Error display -->
   <p class="error" th:if="${error}" th:text="${error}"></p>
 </div>
 
