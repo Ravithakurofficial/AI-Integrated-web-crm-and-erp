@@ -12,8 +12,7 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 @Controller
-
-@CrossOrigin
+@CrossOrigin(origins = "*") // You can restrict to specific domains in production
 public class LoginController {
 
     private static final Logger logger = Logger.getLogger(LoginController.class.getName());
@@ -29,16 +28,21 @@ public class LoginController {
 
     // 🔐 Login authentication
     @PostMapping("/auth")
-    public String authenticateUser(@RequestParam String gmail,
-                                   @RequestParam String password,
+    public String authenticateUser(@RequestParam("gmail") String gmail,
+                                   @RequestParam("password") String password,
                                    HttpSession session,
                                    Model model) {
-        if (userService.authenticate(gmail, password)) {
-            session.setAttribute("loggedInUser", userService.getUserByGmail(gmail));
-            return "redirect:/hr";
-        } else {
-            model.addAttribute("error", "Invalid Gmail or Password");
-            return "Login"; // Matches Login.html
+        try {
+            if (userService.authenticate(gmail, password)) {
+                session.setAttribute("loggedInUser", userService.getUserByGmail(gmail));
+                return "redirect:/hr"; // PageController maps this
+            } else {
+                model.addAttribute("error", "Invalid Gmail or Password");
+                return "Login"; // Make sure Login.html exists
+            }
+        } catch (Exception e) {
+            model.addAttribute("error", "Server error: " + e.getMessage());
+            return "Login";
         }
     }
 
@@ -49,7 +53,7 @@ public class LoginController {
                           @RequestParam("phone") String phone,
                           RedirectAttributes redirectAttributes) {
 
-        if (gmail.isEmpty() || password.isEmpty() || phone.isEmpty()) {
+        if (gmail.isBlank() || password.isBlank() || phone.isBlank()) {
             redirectAttributes.addFlashAttribute("error", "All fields are required!");
             return "redirect:/hr";
         }
@@ -63,7 +67,7 @@ public class LoginController {
             userRepository.save(new User(gmail, password, phone));
             redirectAttributes.addFlashAttribute("success", "User added successfully.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error while adding user: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to add user: " + e.getMessage());
         }
 
         return "redirect:/hr";
@@ -78,7 +82,7 @@ public class LoginController {
                           @RequestParam("status") String status,
                           RedirectAttributes redirectAttributes) {
 
-        if (gmail.isEmpty() || phone.isEmpty() || leadName.isEmpty() || address.isEmpty() || status.isEmpty()) {
+        if (gmail.isBlank() || phone.isBlank() || leadName.isBlank() || address.isBlank() || status.isBlank()) {
             redirectAttributes.addFlashAttribute("error", "All fields are required!");
             return "redirect:/leads";
         }
@@ -98,13 +102,13 @@ public class LoginController {
             leadRepository.save(lead);
             redirectAttributes.addFlashAttribute("success", "Lead added successfully.");
         } catch (Exception e) {
-            redirectAttributes.addFlashAttribute("error", "Error while adding lead: " + e.getMessage());
+            redirectAttributes.addFlashAttribute("error", "Failed to add lead: " + e.getMessage());
         }
 
         return "redirect:/leads";
     }
 
-    // 📦 Get All Users (JSON for API or frontend fetch)
+    // 📦 Get All Users (JSON for frontend/API)
     @GetMapping("/displayData")
     @ResponseBody
     public List<User> displayData() {
@@ -115,10 +119,8 @@ public class LoginController {
     @DeleteMapping("/employees/{id}")
     @ResponseBody
     public String deleteEmployee(@PathVariable Long id) {
-        if (userService.deleteUser(id)) {
-            return "Employee deleted successfully";
-        } else {
-            return "User not found";
-        }
+        return userService.deleteUser(id)
+                ? "Employee deleted successfully"
+                : "User not found";
     }
 }
