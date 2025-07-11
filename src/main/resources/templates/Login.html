@@ -70,7 +70,13 @@
 
 <div class="container">
   <h2>Login</h2>
-  <form action="/auth" method="post">
+
+  <!-- Use Thymeleaf's th:action to generate the URL and add CSRF token -->
+  <form th:action="@{/auth}" method="post">
+
+    <!-- Include CSRF Token -->
+    <input type="hidden" th:name="${_csrf.parameterName}" th:value="${_csrf.token}" />
+
     <label>Gmail:</label>
     <input type="text" name="gmail" required>
 
@@ -80,8 +86,10 @@
     <button type="submit">Login</button>
   </form>
 
+  <!-- Display error if present -->
   <p class="error" th:if="${error}" th:text="${error}"></p>
 </div>
 
 </body>
+
 </html>
