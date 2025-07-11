@@ -36,7 +36,7 @@ public class PageController {
     public String showDashboard(HttpSession session, Model model) {
         Map<String, Long> leadStatusCounts = userService.getLeadStatusCounts();
         model.addAttribute("leadStatusCounts", leadStatusCounts);
-        return "dashboard";
+        return "DashBoard";
         }
 
     // Stocks route
