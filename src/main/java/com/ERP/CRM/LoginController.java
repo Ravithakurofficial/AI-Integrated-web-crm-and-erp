@@ -34,7 +34,7 @@ public class LoginController {
         if (userService.authenticate(gmail, password)) {
             User user = userService.getUserByGmail(gmail);
             session.setAttribute("loggedInUser", user);
-            return "DashBoard"; // ✅ Must match the mapping in PageController
+            return "redirect:/hr"; // ✅ Must match the mapping in PageController
         } else {
             model.addAttribute("error", "Invalid Gmail or Password");
             return "Login"; // ✅ Make sure Login.html exists and is named with capital "L" if used
