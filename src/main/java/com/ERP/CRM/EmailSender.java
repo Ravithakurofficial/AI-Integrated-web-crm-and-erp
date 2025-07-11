@@ -42,10 +42,8 @@ public class EmailSender {
             JsonNode root = objectMapper.readTree(cohereResponse);
             String textResponse = root.has("text") ? root.get("text").asText() : "";
 
-            // Remove markdown if present
             textResponse = textResponse.replaceAll("```json", "").replaceAll("```", "").trim();
 
-            // Extract JSON from inside the text
             int startIndex = textResponse.indexOf("{");
             int endIndex = textResponse.lastIndexOf("}") + 1;
 
@@ -59,7 +57,7 @@ public class EmailSender {
             } else {
                 System.err.println("Failed to extract JSON from response text.");
                 result.put("subject", "Invitation to Increase Your Sales");
-                result.put("body", "Hi there, Thank you for your continued support. We are excited to share with you an innovative tool that will take your sales figures to the next level. Give our CRM platform a try and experience the difference for yourself. Feel free to get in touch with our representative, Ravi, through our website or this phone number: 8700661852. We can't wait to work with you! Sincerely, Lining Solutions Simply click on the following URL to access the tracking page: https://ravithakurofficial.github.io/mailtracker.github.io/index.html\n");
+                result.put("body", "Hi there, Thank you for your continued support. We are excited to share with you an innovative tool that will take your sales figures to the next level. Give our CRM platform a try and experience the difference for yourself. Feel free to get in touch with our representative, Ravi, through our website or this phone number: 8700661852. We can't wait to work with you! Sincerely, Lining Solutions. Simply click on the following URL to access the tracking page: https://ravithakurofficial.github.io/mailtracker.github.io/index.html\n");
             }
 
         } catch (Exception e) {
@@ -103,18 +101,22 @@ public class EmailSender {
     public void sendEmail(String toEmail, String subject, String htmlContent) throws MessagingException {
         Map<String, String> aiContent = generateEmailContent("Subject: " + subject + "\nBody: " + htmlContent);
 
+        // 👇 Add tracking image
+        String trackingPixel = "<img src='https://ai-integrated-web-crm-and-erp-production.up.railway.app/track?email=" + toEmail + "' width='1' height='1' style='display:none;' />";
+        String finalBody = aiContent.get("body") + trackingPixel;
+
         MimeMessage message = mailSender.createMimeMessage();
         MimeMessageHelper helper = new MimeMessageHelper(message, true);
 
         helper.setTo(toEmail);
         helper.setSubject(aiContent.get("subject"));
-        helper.setText(aiContent.get("body"), true); // true = HTML content
+        helper.setText(finalBody, true); // Enable HTML body
 
         try {
             mailSender.send(message);
-            System.out.println("Email sent to " + toEmail);
+            System.out.println("✅ Email sent to " + toEmail);
         } catch (Exception e) {
-            System.err.println("Failed to send email: " + e.getMessage());
+            System.err.println("❌ Failed to send email: " + e.getMessage());
             throw new MessagingException("Failed to send email", e);
         }
     }
