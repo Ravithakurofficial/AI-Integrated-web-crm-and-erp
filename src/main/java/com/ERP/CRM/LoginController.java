@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.logging.Logger;
 
 @Controller
+
+@CrossOrigin
 public class LoginController {
 
     private static final Logger logger = Logger.getLogger(LoginController.class.getName());
