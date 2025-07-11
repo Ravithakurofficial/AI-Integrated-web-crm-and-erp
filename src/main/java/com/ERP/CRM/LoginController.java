@@ -27,17 +27,16 @@ public class LoginController {
 
     // 🔐 Login authentication
     @PostMapping("/auth")
-    public String authenticateUser(@RequestParam("gmail") String gmail,
-                                   @RequestParam("password") String password,
+    public String authenticateUser(@RequestParam String gmail,
+                                   @RequestParam String password,
                                    HttpSession session,
                                    Model model) {
         if (userService.authenticate(gmail, password)) {
-            User user = userService.getUserByGmail(gmail);
-            session.setAttribute("loggedInUser", user);
-            return "redirect:/hr"; // Redirect to HR page
+            session.setAttribute("loggedInUser", userService.getUserByGmail(gmail));
+            return "redirect:/hr";
         } else {
             model.addAttribute("error", "Invalid Gmail or Password");
-            return "Login"; // This should be Login.html or Login.jsp
+            return "Login"; // Matches Login.html
         }
     }
 
