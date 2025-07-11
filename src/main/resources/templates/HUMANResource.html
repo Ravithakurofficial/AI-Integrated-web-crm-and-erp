@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HR PANEL</title>
+  <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .navbar {
+            background-color: #007bff;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px;
+        }
+        .navbar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+        .container {
+            margin-top: 30px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            width: 180px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            width: 350px;
+            margin: 20px auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+        table {
+            width: 60%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 12px;
+            text-align: center;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            width: 300px;
+            margin: 50px auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+<h2>Welcome, <span th:text="${session.loggedInUser.gmail}"></span>!</h2>
+<a href="/logout" class="btn">Logout</a>
+
+<div class="navbar">
+  <a href="/dashboard">Dashboard</a>
+  <a href="/stocks">Stocks</a>
+  <a href="/leads">Leads</a>
+  <a href="/templates">Templates</a>
+  <a href="/customers">Customers</a>
+  <a href="/hr">HR</a>
+  <a href="/transport">Transport</a>
+  <a href="/Pricing">Update Price</a>
+  <a href="/BillPage">Create Invoice</a>
+</div>
+
+<div class="container">
+  <h2>HR PANEL</h2>
+  <button class="btn" onclick="toggleForm()">Add Employee</button>
+</div>
+
+<form id="employeeForm" action="/addEmp" method="POST">
+  <label for="gmail">Gmail:</label>
+  <input type="email" id="gmail" name="gmail" placeholder="Enter your Gmail" required>
+
+  <label for="phone">Phone Number:</label>
+  <input type="tel" id="phone" name="phone" placeholder="Enter your phone number" pattern="[0-9]{10}" required>
+
+  <label for="password">Password:</label>
+  <input type="password" id="password" name="password" placeholder="Enter your password" required>
+
+  <button type="submit">Submit</button>
+</form>
+<div class="displayEmp">
+  <h3>Available Employees</h3>
+  <table>
+    <thead>
+    <tr>
+      <th>ID</th>
+      <th>Gmail</th>
+      <th>Phone</th>
+      <th>Action</th>
+    </tr>
+    </thead>
+    <tbody id="employeeTable">
+    </tbody>
+  </table>
+</div>
+
+<script>
+    function toggleForm() {
+        document.getElementById("employeeForm").style.display = "block";
+    }
+
+    function loadEmployees() {
+    fetch("/displayData")
+    .then(response => response.json()) // Parse JSON response
+    .then(data => {
+        const employeeTable = document.getElementById("employeeTable"); // No need for .getElementsByTagName('tbody')[0]
+        employeeTable.innerHTML = ""; // Clear previous data
+
+        data.forEach(emp => {
+            const row = document.createElement("tr");
+            row.innerHTML = `
+                <td>${emp.id}</td>
+                <td>${emp.gmail}</td>
+                <td>${emp.phone}</td>
+                <td><button class="btn delete-btn" onclick="deleteEmployee(${emp.id})">Delete</button></td>
+            `;
+            employeeTable.appendChild(row);
+        });
+    })
+    .catch(error => {
+        console.error("Error loading employees:", error);
+    });
+}
+
+    function deleteEmployee(empId) {
+        if (confirm("Are you sure you want to delete this employee?")) {
+            fetch(`/employees/${empId}`, { method: "DELETE" })
+                .then(response => {
+                    if (response.ok) {
+                        alert("Employee deleted successfully");
+                        location.reload();
+                    } else {
+                        response.text().then(text => alert("Error: " + text));
+                    }
+                }).catch(error => alert("Failed to delete employee: " + error));
+        }
+    }
+
+    document.addEventListener("DOMContentLoaded", loadEmployees);
+</script>
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Leads</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #007bff;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px 15px;
+            transition: background-color 0.3s ease;
+        }
+
+        .navbar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            width: 180px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            width: 350px;
+            margin: 20px auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+
+        label {
+            display: block;
+            margin-top: 10px;
+            text-align: left;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 10px;
+            margin-top: 5px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        table {
+            width: 90%;
+            max-width: 1000px;
+            margin: 30px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            overflow: hidden;
+        }
+
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px;
+            text-align: center;
+        }
+
+        th {
+            background-color: #007bff;
+            color: white;
+        }
+
+        td button {
+            background-color: #28a745;
+            color: white;
+            border: none;
+            padding: 6px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        td button:hover {
+            background-color: #218838;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Welcome, <span th:text="${session.loggedInUser.gmail}"></span>!</h2>
+<a href="/logout" class="btn">Logout</a>
+
+<div class="navbar">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/stocks">Stocks</a>
+    <a href="/leads">Leads</a>
+    <a href="/templates">Templates</a>
+    <a href="/customers">Customers</a>
+    <a href="/hr">HR</a>
+    <a href="/transport">Transport</a>
+    <a href="/Pricing">Update Price</a>
+    <a href="/BillPage">Create Invoice</a>
+</div>
+
+<button class="btn" onclick="toggleForm()">Add Lead</button>
+
+<form id="AddLeadForm" onsubmit="submitLead(event)">
+    <label for="leadName">Lead Name:</label>
+    <input type="text" id="leadName" name="leadName" placeholder="Enter Lead Name" required>
+
+    <label for="address">Address:</label>
+    <input type="text" id="address" name="address" placeholder="Enter Address" required>
+
+    <label for="phone">Phone Number:</label>
+    <input type="tel" id="phone" name="phone" placeholder="Enter Phone Number" pattern="[0-9]{10}" required>
+
+    <label for="email">Email:</label>
+    <input type="email" id="email" name="email" placeholder="Enter Email" required>
+
+    <label for="status">Status:</label>
+    <select id="status" name="status" required>
+        <option value="New" selected>New</option>
+    </select>
+
+    <button type="submit">Submit</button>
+</form>
+
+<table>
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Lead Name</th>
+        <th>Address</th>
+        <th>Phone Number</th>
+        <th>Email</th>
+        <th>Status</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody id="LeadsTable"></tbody>
+</table>
+
+<script>
+function toggleForm() {
+    const form = document.getElementById("AddLeadForm");
+    form.style.display = form.style.display === "block" ? "none" : "block";
+}
+
+function LoadLeads() {
+    fetch("/DisplayLeads")
+        .then(response => response.json())
+        .then(data => {
+            const leadstb = document.getElementById("LeadsTable");
+            leadstb.innerHTML = "";
+
+            data.forEach(leads => {
+                if (leads.status !== 'Customer') {
+                    const row = document.createElement("tr");
+                    row.innerHTML = `
+                        <td>${leads.id}</td>
+                        <td>${leads.customerName}</td>
+                        <td>${leads.address}</td>
+                        <td>${leads.phoneNumber}</td>
+                        <td>${leads.gmail}</td>
+                        <td>${leads.status}</td>
+                        <td><button onclick="SendEmail('${leads.gmail}')">Send Mail</button></td>
+                    `;
+                    leadstb.appendChild(row);
+                }
+            });
+        })
+        .catch(error => {
+            console.error("Error loading leads:", error);
+            alert("Failed to load leads. Please try again later.");
+        });
+}
+
+function SendEmail(gmail) {
+    fetch(`/SendMail?to=${encodeURIComponent(gmail)}`, {
+        method: "POST"
+    })
+    .then(response => response.text())
+    .then(message => {
+        alert(message);
+    })
+    .catch(error => {
+        console.error("Error sending mail:", error);
+        alert("Failed to send mail. Please try again.");
+    });
+}
+
+function submitLead(event) {
+    event.preventDefault(); // prevent default form submission
+
+    const form = document.getElementById("AddLeadForm");
+    const formData = new FormData(form);
+
+    fetch("/addLead", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => {
+        if (!response.ok) throw new Error("Network response was not ok.");
+        return response.text();
+    })
+    .then(result => {
+        alert("Lead added successfully!");
+        form.reset(); // Clear form
+        form.style.display = "none"; // Hide form
+        LoadLeads(); // Refresh table
+    })
+    .catch(error => {
+        console.error("Error submitting lead:", error);
+        alert("Failed to add lead. Please try again.");
+    });
+}
+
+window.onload = LoadLeads;
+</script>
+
+</body>
+</html>

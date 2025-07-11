@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <title>Transport</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .navbar {
+            background-color: #007bff;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px;
+        }
+        .navbar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            width: 180px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        form {
+            background: white;
+            padding: 20px;
+            width: 300px;
+            margin: 20px auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            display: none;
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        button, .form-btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover, .form-btn:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 60%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 12px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<h2>Welcome, <span th:text="${session.loggedInUser.gmail}"></span>!</h2>
+<a href="/logout" class="btn">Logout</a>
+
+<div class="navbar">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/stocks">Stocks</a>
+    <a href="/leads">Leads</a>
+    <a href="/templates">Templates</a>
+    <a href="/customers">Customers</a>
+    <a href="/hr">HR</a>
+    <a href="/transport">Transport</a>
+    <a href="/Pricing">Update Price</a>
+    <a href="/BillPage">Create Invoice</a>
+</div>
+
+<button onclick="toggleForm()">Add New Fare</button>
+
+<form id="TransportForm" action="/AddTransData" method="post">
+    <label for="to">TO:</label>
+    <input id="to" name="to" type="text" placeholder="Enter Starting Destination">
+
+    <label for="from">FROM:</label>
+    <input id="from" name="from" type="text" placeholder="Enter Ending Destination">
+
+    <label for="fare">Fare:</label>
+    <input id="fare" name="fare" type="number" placeholder="Enter Fare">
+
+    <button type="submit" class="form-btn">Submit</button>
+</form>
+
+<table id="TransportData">
+    <thead>
+    <tr>
+        <th>ID</th>
+        <th>TO</th>
+        <th>FROM</th>
+        <th>Fare</th>
+    </tr>
+    </thead>
+    <tbody>
+    <!-- Data will be inserted here -->
+    </tbody>
+</table>
+
+<script>
+        function toggleForm() {
+            const form = document.getElementById("TransportForm");
+            form.style.display = form.style.display === "none" || form.style.display === "" ? "block" : "none";
+        }
+
+        function loadTransData() {
+            fetch("/DisplayTransData")
+                .then(response => response.json())
+                .then(data => {
+                    const tbody = document.querySelector("#TransportData tbody");
+                    tbody.innerHTML = ""; // Clear existing rows
+
+                    data.forEach(emp => {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${emp.id}</td>
+                            <td>${emp.to}</td>
+                            <td>${emp.from}</td>
+                            <td>${emp.fare}</td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                })
+                .catch(error => {
+                    console.error("Error loading TransportData:", error);
+                });
+        }
+
+        document.addEventListener("DOMContentLoaded", loadTransData);
+    </script>
+</body>
+</html>

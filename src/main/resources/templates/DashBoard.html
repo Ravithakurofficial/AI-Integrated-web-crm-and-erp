@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #007bff;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px;
+        }
+
+        .navbar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            width: 180px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        .status-box {
+            background: white;
+            width: 300px;
+            padding: 20px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+            margin-top: 0px;
+        }
+
+        .status-box ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .status-box li {
+            font-size: 18px;
+            margin: 10px 0;
+        }
+
+        .dashboard-content {
+            display: flex;
+            align-items: flex-start;
+            gap: 40px;
+            margin-left: 250px;
+            flex-wrap: wrap;
+        }
+
+        .graph-container {
+            width: 600px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            magin-left: 0px;
+        }
+    </style>
+</head>
+<body>
+
+<h2>
+    Welcome, <span th:text="${session.loggedInUser.gmail}">user@example.com</span>!
+</h2>
+<a href="/logout" class="btn">Logout</a>
+
+<div class="navbar">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/stocks">Stocks</a>
+    <a href="/leads">Leads</a>
+    <a href="/templates">Templates</a>
+    <a href="/customers">Customers</a>
+    <a href="/hr">HR</a>
+    <a href="/transport">Transport</a>
+    <a href="/Pricing">Update Price</a>
+    <a href="/BillPage">Create Invoice</a>
+</div>
+
+<h2>Dashboard</h2>
+
+<div class="dashboard-content">
+    <!-- Graph Container -->
+    <div class="graph-container">
+        <canvas id="leadStatusChart"></canvas>
+    </div>
+
+    <!-- Status Box -->
+    <div class="status-box">
+        <h3>Lead Status Overview</h3>
+        <ul>
+            <li>New: <span th:text="${leadStatusCounts['NEW']}">0</span></li>
+            <li>Open: <span th:text="${leadStatusCounts['Open']}">0</span></li>
+            <li>Sent: <span th:text="${leadStatusCounts['Sent']}">0</span></li>
+            <li>In Progress: <span th:text="${leadStatusCounts['In_Progress']}">0</span></li>
+            <li>Customer: <span th:text="${leadStatusCounts['CLOSED']}">0</span></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Chart.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Chart Script -->
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const ctx = document.getElementById('leadStatusChart').getContext('2d');
+    const chart = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: ['New', 'Open', 'Sent', 'In Progress', 'Customer'],
+            datasets: [{
+                label: 'Lead Status Count',
+                data: [
+                    [[${leadStatusCounts['NEW']}]],
+                    [[${leadStatusCounts['Open']}]],
+                    [[${leadStatusCounts['Sent']}]],
+                    [[${leadStatusCounts['In_Progress']}]],
+                    [[${leadStatusCounts['CLOSED']}]]
+                ],
+                backgroundColor: [
+                    '#007bff', '#17a2b8', '#ffc107', '#fd7e14', '#28a745'
+                ],
+                borderColor: [
+                    '#0056b3', '#117a8b', '#e0a800', '#e8590c', '#218838'
+                ],
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    precision: 0
+                }
+            }
+        }
+    });
+    /*]]>*/
+</script>
+
+</body>
+</html>

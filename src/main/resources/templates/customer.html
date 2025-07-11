@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Customer</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+        .navbar {
+            background-color: #007bff;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px;
+        }
+        .navbar a:hover {
+            background-color: #0056b3;
+            border-radius: 5px;
+        }
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            width: 180px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .btn:hover {
+            background-color: #0056b3;
+        }
+        table {
+            width: 80%;
+            margin: 20px auto;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+        th, td {
+            border: 1px solid black;
+            padding: 12px;
+            text-align: center;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+
+<h2>Welcome, <span th:text="${session.loggedInUser.gmail}">User</span>!</h2>
+<a href="/logout" class="btn">Logout</a>
+
+<div class="navbar">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/stocks">Stocks</a>
+    <a href="/leads">Leads</a>
+    <a href="/templates">Templates</a>
+    <a href="/customers">Customers</a>
+    <a href="/hr">HR</a>
+    <a href="/transport">Transport</a>
+    <a href="/Pricing">Update Price</a>
+    <a href="/BillPage">Create Invoice</a>
+</div>
+
+<table>
+    <thead>
+    <tr>
+        <th>Id</th>
+        <th>Lead Name</th>
+        <th>Address</th>
+        <th>Phone Number</th>
+        <th>Email</th>
+        <th>Action</th>
+    </tr>
+    </thead>
+    <tbody id="LeadsTable"></tbody>
+</table>
+
+<script>
+    function LoadLeads() {
+        fetch("/DisplayLeads")
+            .then(response => response.json())
+            .then(data => {
+                const leadstb = document.getElementById("LeadsTable");
+                leadstb.innerHTML = "";
+
+                data.forEach(leads => {
+                    if (leads.status === 'Customer') {
+                        const row = document.createElement("tr");
+                        row.innerHTML = `
+                            <td>${leads.id}</td>
+                            <td>${leads.customerName}</td>
+                            <td>${leads.address}</td>
+                            <td>${leads.phoneNumber}</td>
+                            <td>${leads.gmail}</td>
+                            <td><button onclick="SendEmail('${leads.gmail}')">Send Mail</button></td>
+                        `;
+                        leadstb.appendChild(row);
+                    }
+                });
+            })
+            .catch(error => {
+                console.error("Error loading Client data:", error);
+                alert("Failed to load leads. Please try again later.");
+            });
+    }
+
+    function SendEmail(gmail) {
+        fetch(`/SendMail?to=${encodeURIComponent(gmail)}`, {
+            method: "POST"
+        })
+        .then(response => response.text())
+        .then(message => {
+            alert(message);
+        })
+        .catch(error => {
+            console.error("Error sending mail:", error);
+            alert("Failed to send mail. Please try again.");
+        });
+    }
+
+    window.onload = LoadLeads;
+</script>
+
+</body>
+</html>

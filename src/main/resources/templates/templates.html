@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Templates</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #007bff;
+            padding: 15px 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration: none;
+            font-size: 18px;
+            padding: 10px;
+            border-radius: 5px;
+        }
+
+        .navbar a:hover {
+            background-color: #0056b3;
+        }
+
+        .container {
+            margin-top: 30px;
+        }
+
+        .btn {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            margin: 10px;
+            border: none;
+            width: 180px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+
+        .btn:hover {
+            background-color: #0056b3;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            width: 400px;
+            margin: 20px auto;
+            box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            border-radius: 10px;
+        }
+
+        label {
+            display: block;
+            margin: 10px 0 5px;
+            font-weight: bold;
+            text-align: left;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 15px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px;
+            border: none;
+            width: 100%;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+<h2>Welcome, <span th:text="${session.loggedInUser.gmail}"></span>!</h2>
+<a href="/logout" class="btn">Logout</a>
+
+<div class="navbar">
+    <a href="/dashboard">Dashboard</a>
+    <a href="/stocks">Stocks</a>
+    <a href="/leads">Leads</a>
+    <a href="/templates">Templates</a>
+    <a href="/customers">Customers</a>
+    <a href="/hr">HR</a>
+    <a href="/transport">Transport</a>
+    <a href="/Pricing">Update Price</a>
+    <a href="/BillPage">Create Invoice</a>
+</div>
+
+<form id="productForm" action="/Catalog" method="post" enctype="multipart/form-data">
+    <h3>Product Details</h3>
+
+    <label for="productName">Product Name:</label>
+    <input type="text" id="productName" name="productName" required>
+
+    <label for="productDescription">Description:</label>
+    <input type="text" id="productDescription" name="productDescription" required>
+
+    <label for="productWeight">Weight:</label>
+    <input type="text" id="productWeight" name="productWeight" required>
+
+    <label for="productHeight">Height:</label>
+    <input type="text" id="productHeight" name="productHeight" required>
+
+    <label for="productLength">Length:</label>
+    <input type="text" id="productLength" name="productLength" required>
+
+    <label for="productCategory">Category:</label>
+    <input type="text" id="productCategory" name="productCategory" required>
+
+    <label for="productImage">Upload Image:</label>
+    <input type="file" id="productImage" name="productImage">
+
+    <button type="submit">Add Product</button>
+</form>
+
+<div id="catalogResult" style="margin-top: 20px; padding: 20px;"></div>
+
+<button id="downloadBtn" style="display: none; margin-top: 10px;" onclick="downloadAsPDF()">
+    Download as PDF
+</button>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+<script>
+        document.getElementById("productForm").addEventListener("submit", async function(event) {
+            event.preventDefault();
+            let formData = new FormData(this);
+            try {
+                let response = await fetch("/Catalog", {
+                    method: "POST",
+                    body: formData
+                });
+                let result = await response.text();
+                document.getElementById("catalogResult").innerHTML = result;
+                document.getElementById("downloadBtn").style.display = "block";
+            } catch (error) {
+                console.error("Error:", error);
+                alert("Failed to submit data.");
+            }
+        });
+
+        function downloadAsPDF() {
+            let content = document.getElementById("catalogResult");
+            let opt = {
+                margin: 10,
+                filename: 'Product_Catalog.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+            };
+            html2pdf().from(content).set(opt).save();
+        }
+    </script>
+</body>
+</html>
