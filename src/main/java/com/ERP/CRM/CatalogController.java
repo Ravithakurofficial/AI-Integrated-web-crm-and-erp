@@ -12,6 +12,7 @@ import java.util.Base64;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*") // You can restrict to specific domains in production
 public class CatalogController {
 
     @Autowired

@@ -21,6 +21,8 @@ import java.util.List;
 import java.util.Optional;
 
 @RestController
+@CrossOrigin(origins = "*") // You can restrict to specific domains in production
+
 public class LeadsController {
 
     @Autowired

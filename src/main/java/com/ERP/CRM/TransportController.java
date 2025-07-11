@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @Controller // Use @Controller for view/redirect behavior
-@CrossOrigin(origins = "*")
+@CrossOrigin(origins = "*") // You can restrict to specific domains in production
 public class TransportController {
 
     @Autowired

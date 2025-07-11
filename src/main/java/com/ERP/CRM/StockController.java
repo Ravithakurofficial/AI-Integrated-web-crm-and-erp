@@ -12,6 +12,8 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Controller
+@CrossOrigin(origins = "*") // You can restrict to specific domains in production
+
 public class StockController {
 
     @Autowired
